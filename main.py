@@ -5,6 +5,7 @@ from config import app
 from models import db, User, Dictionary
 from forms import LoginForm
 from flask_login import current_user, login_user, logout_user, login_required
+from forms import RegistrationForm
 
 # imports for "flask shell" interactive python
 @app.shell_context_processor
@@ -16,7 +17,7 @@ def make_shell_context():
 @app.route('/')
 @login_required
 def welcome():
-    resp = make_response(render_template('welcome.html', title='Welcome'))
+    resp = make_response(render_template('welcome.html'))
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
@@ -26,7 +27,8 @@ def welcome():
 @app.route('/index')
 @login_required
 def index():
-    return "Hello, World"
+    username = current_user.username
+    return "Hello, {}".format(username)
 
 # login form
 @app.route('/login', methods=['GET', 'POST'])
@@ -48,9 +50,25 @@ def login():
 
 # logout
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 
 if __name__ == '__main__':
