@@ -15,7 +15,12 @@
             </div>
 
             <article>
-                <h1>Dictionary SP > FR</h1>
+                {% block content %}
+                    <h1>Hi, {{ current_user.username }}!</h1>
+                    {% for dictionary in dictionaries %}
+                        <div><p>{{ dictionary.author.username }} is: <b>{{ dictionary.dict_name }}</b></p></div>
+                    {% endfor %}
+                {% endblock %}
             </article>
         </section>
 
