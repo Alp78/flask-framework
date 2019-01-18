@@ -35,10 +35,17 @@ class EditProfileForm(FlaskForm):
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
-        print(username.data)
-        print(user.username)
-        print(current_user.username)
         if user is not None and username.data != current_user.username:
             raise ValidationError('Username \'{}\' already exists!'.format(username.data))
         if username.data == current_user.username:
             raise ValidationError('Username \'{}\' is already assigned to you!'.format(username.data))
+       
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')

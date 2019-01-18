@@ -3,14 +3,23 @@ from werkzeug.urls import url_parse
 import liveserver
 from config import app
 from models import db, User, Dictionary
-from forms import LoginForm, EditProfileForm
+from forms import LoginForm, EditProfileForm, ResetPasswordRequestForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
 from forms import RegistrationForm
 from datetime import datetime
 import logging
 from logging.handlers import SMTPHandler
-from emailbot import sendMail
+from emailbot import sendMail, sendAsyncMail, send_password_reset_email
 
+app.config.update(
+    MAIL_SERVER='smtp.googlemail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME = 'alexis.peringer',
+    MAIL_PASSWORD = 'Rodion_prod78',
+    MAIL_DEFAULT_SENDER = 'alexis.peringer@gmail.com',
+    SECURITY_EMAIL_SENDER = 'alexis.peringer@gmail.com'
+)
 
 # imports for "flask shell" interactive python
 @app.shell_context_processor
@@ -33,11 +42,12 @@ def edit_profile():
     if form.validate_on_submit():
         # checks if username already exists
         if db.session.query(User).filter_by(username=form.username.data).first():
-            subjectLine = 'Another user tried to pick an existing username'
-            emailBody = 'User {} - Edit Profile Error: Existing User {}'.format(current_user.username, form.username.data)
-            sendMail(subjectLine, emailBody)
             
             """
+            subjectLine = 'Another user tried to pick an existing username'
+            emailBody = 'User {} - Edit Profile Error: Existing User {}'.format(current_user.username, form.username.data)
+            sendAsyncMail(subjectLine, emailBody)
+            
             init_email_error_handler(app, 'User {} - Edit Profile Error: Existing User {}'
             .format(current_user.username, form.username.data))
             
@@ -126,6 +136,8 @@ def user(username):
     return render_template('user.html', user=user, dictionaries=dictionaries)
 
 
+
+
 """
 def init_email_error_handler(app, subjectLine):
 
@@ -158,6 +170,30 @@ def init_email_error_handler(app, subjectLine):
     # Log errors using: app.logger.error('Some error message') 
 """
 
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Check your email for the instructions to reset your password')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
 
 
 if __name__ == '__main__':
