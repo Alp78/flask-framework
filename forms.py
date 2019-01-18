@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField,TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo,Length
 from models import User
+from flask_login import current_user
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -31,3 +32,13 @@ class EditProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('Submit')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        print(username.data)
+        print(user.username)
+        print(current_user.username)
+        if user is not None and username.data != current_user.username:
+            raise ValidationError('Username \'{}\' already exists!'.format(username.data))
+        if username.data == current_user.username:
+            raise ValidationError('Username \'{}\' is already assigned to you!'.format(username.data))
