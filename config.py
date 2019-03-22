@@ -10,8 +10,8 @@ app.config.update(
     MAIL_SERVER='smtp.googlemail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=1,
-    MAIL_USERNAME = 'alexis.peringer',
-    MAIL_PASSWORD = 'Rodion_prod78'
+    MAIL_USERNAME = '',
+    MAIL_PASSWORD = ''
 )
 
 
@@ -31,4 +31,4 @@ MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 # the address to which the report will be sent
-ADMINS = ['peringer@google.com']  
+ADMINS = ['']  
