@@ -15,10 +15,10 @@ app.config.update(
     MAIL_SERVER='smtp.googlemail.com',
     MAIL_PORT=465,
     MAIL_USE_SSL=True,
-    MAIL_USERNAME = 'alexis.peringer',
-    MAIL_PASSWORD = 'Rodion_prod78',
-    MAIL_DEFAULT_SENDER = 'alexis.peringer@gmail.com',
-    SECURITY_EMAIL_SENDER = 'alexis.peringer@gmail.com'
+    MAIL_USERNAME = '******',
+    MAIL_PASSWORD = '******',
+    MAIL_DEFAULT_SENDER = '************',
+    SECURITY_EMAIL_SENDER = '*************'
 )
 
 # imports for "flask shell" interactive python
