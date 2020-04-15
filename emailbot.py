@@ -34,7 +34,7 @@ def send_password_reset_email(user):
     print(user.username)
     print(user.email)
     sendFlaskMail('[Live Dictionary] Reset Your Password',
-               sender=['Alex', 'alexis.peringer@gmail.com'],
+               sender=['', ''],
                recipients=[user.email],
                text_body=render_template('email/reset_password.txt',
                                          user=user, token=token),
